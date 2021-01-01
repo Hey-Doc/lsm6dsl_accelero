@@ -156,6 +156,8 @@ int main(void)
   float sizV=0.0;
   int cyc = 0;
   int CycTrue = 0;
+
+  double emg_val;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -196,7 +198,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    /* USER CODE END WHILE */
+  	// Section about accelerometer
 	  BSP_ACCELERO_AccGetXYZ(axyz);
 	  Axyz[0]=(float)19.62*axyz[0]/16384;
 	  Axyz[1]=(float)19.62*axyz[1]/16384;
@@ -227,7 +229,18 @@ int main(void)
 	  if(CycTrue){
 	  	detect(stdV, meanV, stdM, meanM);
 	  }
+
+	  // From here on code about EMG sensor
+	  HAL_ADC_Start(&hadc1);
+	  HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
+	  uint16_t raw = HAL_ADC_GetValue(&hadc1);
+
+	  emg_val = raw / (4095 / 3.3 * 3.0); // Max output voltage of EMG sensor is 3.0V, STM32L4+'s ADC is 12bit
+
+	  // Delay
 	  HAL_Delay(100);
+    /* USER CODE END WHILE */
+
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
