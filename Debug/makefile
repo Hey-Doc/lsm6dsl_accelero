@@ -54,8 +54,8 @@ all: main-build
 main-build: lsm6dsl_accelero.elf secondary-outputs
 
 # Tool invocations
-lsm6dsl_accelero.elf: $(OBJS) $(USER_OBJS) D:\sigma\ intelligence\stm\lsm6dsl_accelero\STM32L4S5VITX_FLASH.ld
-	arm-none-eabi-gcc -o "lsm6dsl_accelero.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"D:\sigma intelligence\stm\lsm6dsl_accelero\STM32L4S5VITX_FLASH.ld" --specs=nosys.specs -Wl,-Map="lsm6dsl_accelero.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+lsm6dsl_accelero.elf: $(OBJS) $(USER_OBJS) C:\Users\alfre\OneDrive\Documentos\GitHub\lsm6dsl_accelero\STM32L4S5VITX_FLASH.ld
+	arm-none-eabi-gcc -o "lsm6dsl_accelero.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\alfre\OneDrive\Documentos\GitHub\lsm6dsl_accelero\STM32L4S5VITX_FLASH.ld" --specs=nosys.specs -Wl,-Map="lsm6dsl_accelero.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

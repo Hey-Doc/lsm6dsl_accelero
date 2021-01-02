@@ -50,6 +50,8 @@ extern "C" {
 
 /* USER CODE END EM */
 
+void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
+
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
 
@@ -151,9 +153,6 @@ void Error_Handler(void);
 #define ARD_D2_Pin GPIO_PIN_14
 #define ARD_D2_GPIO_Port GPIOD
 #define ARD_D2_EXTI_IRQn EXTI15_10_IRQn
-#define HTS221_DRDY_EXTI15_Pin GPIO_PIN_15
-#define HTS221_DRDY_EXTI15_GPIO_Port GPIOD
-#define HTS221_DRDY_EXTI15_EXTI_IRQn EXTI15_10_IRQn
 #define VL53L0X_XSHUT_Pin GPIO_PIN_6
 #define VL53L0X_XSHUT_GPIO_Port GPIOC
 #define VL53L0X_GPIO1_EXTI7_Pin GPIO_PIN_7
@@ -168,18 +167,12 @@ void Error_Handler(void);
 #define SPBTLE_RF_RST_GPIO_Port GPIOA
 #define USB_OTG_FS_VBUS_Pin GPIO_PIN_9
 #define USB_OTG_FS_VBUS_GPIO_Port GPIOA
-#define USB_OTG_FS_ID_Pin GPIO_PIN_10
-#define USB_OTG_FS_ID_GPIO_Port GPIOA
-#define USB_OTG_FS_DM_Pin GPIO_PIN_11
-#define USB_OTG_FS_DM_GPIO_Port GPIOA
-#define USB_OTG_FS_DP_Pin GPIO_PIN_12
-#define USB_OTG_FS_DP_GPIO_Port GPIOA
+#define Buzzer_Pin GPIO_PIN_12
+#define Buzzer_GPIO_Port GPIOA
 #define SYS_JTMS_SWDIO_Pin GPIO_PIN_13
 #define SYS_JTMS_SWDIO_GPIO_Port GPIOA
 #define SYS_JTCK_SWCLK_Pin GPIO_PIN_14
 #define SYS_JTCK_SWCLK_GPIO_Port GPIOA
-#define ARD_D9_Pin GPIO_PIN_15
-#define ARD_D9_GPIO_Port GPIOA
 #define INTERNAL_SPI3_SCK_Pin GPIO_PIN_10
 #define INTERNAL_SPI3_SCK_GPIO_Port GPIOC
 #define INTERNAL_SPI3_MISO_Pin GPIO_PIN_11
