@@ -25,6 +25,9 @@
 #include "stm32l4s5i_iot01.h"
 #include "stm32l4s5i_iot01_accelero.h"
 #include "math.h"
+#include <stdio.h>
+#include <string.h>
+
 #define buflen 100
 /* USER CODE END Includes */
 
@@ -44,6 +47,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 ADC_HandleTypeDef hadc1;
+DMA_HandleTypeDef hdma_adc1;
 
 DFSDM_Channel_HandleTypeDef hdfsdm1_channel2;
 
@@ -67,6 +71,7 @@ UART_HandleTypeDef huart3;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_DMA_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_DFSDM1_Init(void);
 static void MX_I2C1_Init(void);
@@ -75,10 +80,10 @@ static void MX_OCTOSPI1_Init(void);
 static void MX_SPI1_Init(void);
 static void MX_SPI3_Init(void);
 static void MX_UART4_Init(void);
-static void MX_USART1_UART_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_USART3_UART_Init(void);
 static void MX_USB_OTG_FS_USB_Init(void);
+static void MX_USART1_UART_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -157,7 +162,8 @@ int main(void)
   int cyc = 0;
   int CycTrue = 0;
 
-  double emg_val;
+  //double emg_val;
+  uint32_t adc_val[2]; // Place to store ADC values
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -178,6 +184,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_ADC1_Init();
   MX_DFSDM1_Init();
   MX_I2C1_Init();
@@ -186,11 +193,13 @@ int main(void)
   MX_SPI1_Init();
   MX_SPI3_Init();
   MX_UART4_Init();
-  MX_USART1_UART_Init();
   MX_USART2_UART_Init();
   MX_USART3_UART_Init();
   MX_USB_OTG_FS_USB_Init();
+  MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
+
+  HAL_ADC_Start_DMA(&hadc1, adc_val, 2); // Start ADC in DMA mode
 
   /* USER CODE END 2 */
 
@@ -231,11 +240,20 @@ int main(void)
 	  }
 
 	  // From here on code about EMG sensor
+	  /*
 	  HAL_ADC_Start(&hadc1);
 	  HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
 	  uint16_t raw = HAL_ADC_GetValue(&hadc1);
 
 	  emg_val = raw / (4095 / 3.3 * 3.0); // Max output voltage of EMG sensor is 3.0V, STM32L4+'s ADC is 12bit
+	  */
+	  // New code using DMA to read multiple channels
+	  uint32_t emg = adc_val[0];
+	  uint32_t heart = adc_val[1];
+
+	  // Print out in terminal
+	  sprintf(msg, "EMG: %hu\r\nHeart Rate: %hu\r\n\r\n", emg, heart);
+	  HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
 
 	  // Delay
 	  HAL_Delay(100);
@@ -352,11 +370,11 @@ static void MX_ADC1_Init(void)
   hadc1.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV1;
   hadc1.Init.Resolution = ADC_RESOLUTION_12B;
   hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-  hadc1.Init.ScanConvMode = ADC_SCAN_DISABLE;
+  hadc1.Init.ScanConvMode = ADC_SCAN_ENABLE;
   hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
   hadc1.Init.LowPowerAutoWait = DISABLE;
-  hadc1.Init.ContinuousConvMode = DISABLE;
-  hadc1.Init.NbrOfConversion = 1;
+  hadc1.Init.ContinuousConvMode = ENABLE;
+  hadc1.Init.NbrOfConversion = 2;
   hadc1.Init.DiscontinuousConvMode = DISABLE;
   hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
   hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
@@ -375,6 +393,14 @@ static void MX_ADC1_Init(void)
   sConfig.SingleDiff = ADC_SINGLE_ENDED;
   sConfig.OffsetNumber = ADC_OFFSET_NONE;
   sConfig.Offset = 0;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /** Configure Regular Channel
+  */
+  sConfig.Channel = ADC_CHANNEL_2;
+  sConfig.Rank = ADC_REGULAR_RANK_2;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
     Error_Handler();
@@ -853,6 +879,23 @@ static void MX_USB_OTG_FS_USB_Init(void)
   /* USER CODE BEGIN USB_OTG_FS_Init 2 */
 
   /* USER CODE END USB_OTG_FS_Init 2 */
+
+}
+
+/**
+  * Enable DMA controller clock
+  */
+static void MX_DMA_Init(void)
+{
+
+  /* DMA controller clock enable */
+  __HAL_RCC_DMAMUX1_CLK_ENABLE();
+  __HAL_RCC_DMA1_CLK_ENABLE();
+
+  /* DMA interrupt init */
+  /* DMA1_Channel1_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
 
 }
 
